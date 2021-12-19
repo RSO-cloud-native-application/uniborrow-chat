@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uniborrow-chat-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uniborrow-chat
+  template:
+    metadata:
+      labels:
+        app: uniborrow-chat
+    spec:
+      containers:
+        - image: lh5107/uniborrow-chat:2021-12-20-06-29-55
+          name: uniborrow-chat
+          env:
+            - name: KUMULUZEE_DATASOURCES0_CONNECTIONURL
+              value: jdbc:postgresql://castor.db.elephantsql.com:5432/gdiwsvev
+            - name: KUMULUZEE_DATASOURCES0_USERNAME
+              value: gdiwsvev
+            - name: KUMULUZEE_DATASOURCES0_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: uniborrow-chat-db-pass
+                  key: password
+            - name: KUMULUZEE_CONFIG_CONSUL_AGENT
+              value: http://consul-consul-server:8500
+            - name: KUMULUZEE_DISCOVERY_CONSUL_AGENT
+              value: http://consul-consul-server:8500
+            - name: KUMULUZEE_DISCOVERY_CLUSTER
+              value: uniborrow-cluster
+          ports:
+            - containerPort: 8085
+              name: server
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: server
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: server
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 3
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: uniborrow-chat
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8085
+  selector:
+    app: uniborrow-chat
