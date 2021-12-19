@@ -17,3 +17,22 @@ kumuluzee:
       agent: http://localhost:8500
     start-retry-delay-ms: 500
     max-retry-delay-ms: 900000
+  discovery:
+    consul:
+      agent: http://localhost:8500
+  health:
+    checks:
+      data-source-health-check:
+        type: liveness
+        jndi-name: jdbc/ChatDB
+  metrics:
+    servlet:
+      enabled: true
+      mapping: /metrics/*
+    web-instrumentation:
+      - name: metrics-endpoint
+        url-pattern: /metrics/*
+        status-codes: "200, 500"
+      - name: chat-endpoint
+        url-pattren: /v1/chat/*
+        status-codes: "200, 500"

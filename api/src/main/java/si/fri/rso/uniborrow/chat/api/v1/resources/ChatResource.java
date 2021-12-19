@@ -1,6 +1,7 @@
 package si.fri.rso.uniborrow.chat.api.v1.resources;
 
 import com.kumuluz.ee.discovery.annotations.DiscoverService;
+import org.eclipse.microprofile.metrics.annotation.Counted;
 import si.fri.rso.uniborrow.chat.lib.Chat;
 import si.fri.rso.uniborrow.chat.services.beans.ChatBean;
 
@@ -61,6 +62,7 @@ public class ChatResource {
     }
 
     @POST
+    @Counted(name = "num_created_messages")
     public Response createChat(Chat chat) {
         if (chat.getMessage() == null || chat.getUserFromId() == null || chat.getUserToId() == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -96,6 +98,7 @@ public class ChatResource {
 
     @DELETE
     @Path("/{chatId}")
+    @Counted(name = "num_deleted_messages")
     public Response deleteChat(@PathParam("chatId") Integer chatId) {
         boolean isSuccessful = chatBean.deleteChat(chatId);
         return isSuccessful
