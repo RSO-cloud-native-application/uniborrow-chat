@@ -13,6 +13,14 @@ import java.sql.Timestamp;
                         "WHERE (c.userFrom = :userOne OR c.userTo = :userOne) AND " +
                         "(c.userFrom = :userTwo OR c.userTo = :userTwo) " +
                         "ORDER BY c.msgTimestamp"
+        ),
+        @NamedQuery(
+                name = "ChatEntity.getUsersFromForUser",
+                query = "SELECT DISTINCT c.userFrom FROM ChatEntity c WHERE c.userTo = :userId"
+        ),
+        @NamedQuery(
+                name = "ChatEntity.getUsersToForUser",
+                query = "SELECT DISTINCT c.userTo FROM ChatEntity c WHERE c.userFrom = :userId"
         )
 })
 public class ChatEntity {

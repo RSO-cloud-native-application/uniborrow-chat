@@ -53,5 +53,15 @@
             <groupId>si.fri.rso.uniborrow</groupId>
             <artifactId>chat-models</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+        </dependency>
     </dependencies>
 </project>

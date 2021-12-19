@@ -4,9 +4,9 @@ kumuluzee:
     name: dev
   version: 1.0.0
   server:
-    base-location: http://localhost:8080
+    base-location: http://localhost:8085
     http:
-      port: 8080
+      port: 8085
   datasources:
     - jndi-name: jdbc/ChatDB
       connection-url: jdbc:postgresql://localhost:5431/chat
