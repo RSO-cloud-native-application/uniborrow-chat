@@ -1,0 +1,19 @@
+kumuluzee:
+  name: uniborrow-chat-service
+  env:
+    name: dev
+  version: 1.0.0
+  server:
+    base-location: http://localhost:8080
+    http:
+      port: 8080
+  datasources:
+    - jndi-name: jdbc/ChatDB
+      connection-url: jdbc:postgresql://localhost:5431/chat
+      username: dbuser
+      password: postgres
+  config:
+    consul:
+      agent: http://localhost:8500
+    start-retry-delay-ms: 500
+    max-retry-delay-ms: 900000

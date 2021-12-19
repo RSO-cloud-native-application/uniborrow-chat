@@ -1,0 +1,2 @@
+INSERT INTO chats (user_from, user_to, message) VALUES (1, 2, 'Pozdravljen. Zanima me nakup kosilince.');
+INSERT INTO chats (user_from, user_to, message) VALUES (2, 1, 'Lep pozdrav! Kosilinca je še na voljo. Kdaj jo lahko prevzamete?');
