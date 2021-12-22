@@ -26,9 +26,9 @@ spec:
                   name: uniborrow-chat-db-pass
                   key: password
             - name: KUMULUZEE_CONFIG_CONSUL_AGENT
-              value: http://consul-consul-server:8500
+              value: http://consul-server:8500
             - name: KUMULUZEE_DISCOVERY_CONSUL_AGENT
-              value: http://consul-consul-server:8500
+              value: http://consul-server:8500
             - name: KUMULUZEE_DISCOVERY_CLUSTER
               value: uniborrow-cluster
           ports:
