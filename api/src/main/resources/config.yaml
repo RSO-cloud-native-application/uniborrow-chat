@@ -5,6 +5,7 @@ kumuluzee:
   version: 1.0.0
   server:
     base-location: http://localhost:8085
+    base-url: http://localhost:8085
     http:
       port: 8085
   datasources:
@@ -12,14 +13,21 @@ kumuluzee:
       connection-url: jdbc:postgresql://localhost:5431/chat
       username: dbuser
       password: postgres
+      pool:
+        max-size: 1
   config:
-    consul:
-      agent: http://localhost:8500
+    etcd:
+      hosts: http://localhost:2379
     start-retry-delay-ms: 500
     max-retry-delay-ms: 900000
   discovery:
-    consul:
-      agent: http://localhost:8500
+    etcd:
+      hosts: http://localhost:2379
+  health:
+    checks:
+      data-source-health-check:
+        type: liveness
+        jndi-name: jdbc/ChatDB
   metrics:
     servlet:
       enabled: true

@@ -78,6 +78,7 @@ public class ChatResource {
                 responseFrom = userFromService.request().get();
                 responseTo = userToService.request().get();
             } catch (Exception e) {
+                log.warning("Error: message " + e.getMessage() + ", usersService url: " + usersService.get().getUri().toString());
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             }
 
