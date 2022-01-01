@@ -8,6 +8,10 @@ import java.sql.Timestamp;
 @Table(name = "chats")
 @NamedQueries(value = {
         @NamedQuery(
+                name = "ChatEntity.getAllChats",
+                query = "SELECT c FROM ChatEntity c"
+        ),
+        @NamedQuery(
                 name = "ChatEntity.getChatOfUsers",
                 query = "SELECT c FROM ChatEntity c " +
                         "WHERE (c.userFrom = :userOne OR c.userTo = :userOne) AND " +

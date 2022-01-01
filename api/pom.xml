@@ -79,6 +79,16 @@
         </dependency>
 
         <dependency>
+            <groupId>com.kumuluz.ee.logs</groupId>
+            <artifactId>kumuluzee-logs-log4j2</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.kumuluz.ee.logs</groupId>
+            <artifactId>kumuluzee-logs-common</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>si.fri.rso.uniborrow</groupId>
             <artifactId>chat-lib</artifactId>
         </dependency>

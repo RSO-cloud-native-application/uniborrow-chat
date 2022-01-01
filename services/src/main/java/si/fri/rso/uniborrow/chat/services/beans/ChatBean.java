@@ -11,6 +11,8 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import java.util.Date;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -22,6 +24,12 @@ public class ChatBean {
 
     @Inject
     private EntityManager em;
+
+    public List<Chat> getAllChats() {
+        TypedQuery<ChatEntity> query = em.createNamedQuery("ChatEntity.getAllChats", ChatEntity.class);
+        List<ChatEntity> resultList = query.getResultList();
+        return resultList.stream().map(ChatConverter::toDto).collect(Collectors.toList());
+    }
 
     public List<Chat> getChatsForUsers(Integer userOne, Integer userTwo) {
         TypedQuery<ChatEntity> query = em.createNamedQuery("ChatEntity.getChatOfUsers", ChatEntity.class)
@@ -43,6 +51,9 @@ public class ChatBean {
 
     public Chat createChat(Chat chat) {
         chat.setMessage(sanitizeString(chat.getMessage()));
+
+        Date date = new Date();
+        chat.setMsgTimestamp(new Timestamp(date.getTime()));
 
         var chatEntity = ChatConverter.fromDto(chat);
         try {

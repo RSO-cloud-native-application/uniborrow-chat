@@ -1,6 +1,7 @@
 package si.fri.rso.uniborrow.chat.api.v1.resources;
 
 import com.kumuluz.ee.discovery.annotations.DiscoverService;
+import com.kumuluz.ee.logs.cdi.Log;
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import si.fri.rso.uniborrow.chat.lib.Chat;
 import si.fri.rso.uniborrow.chat.services.beans.ChatBean;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+@Log
 @ApplicationScoped
 @Path("/chat")
 @Produces(MediaType.APPLICATION_JSON)
@@ -27,9 +29,6 @@ public class ChatResource {
 
     @Inject
     ChatBean chatBean;
-
-    @Context
-    protected UriInfo uriInfo;
 
     @Inject
     @DiscoverService(value = "uniborrow-users-service", version = "1.0.0", environment = "dev")
@@ -54,11 +53,12 @@ public class ChatResource {
     public Response getUserChats(
             @QueryParam("userId") Integer userId) {
         if (userId == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            List<Chat> chats = chatBean.getAllChats();
+            return Response.status(Response.Status.OK).entity(chats).build();
+        } else {
+            List<Integer> userIds = chatBean.getUserIdsForUser(userId);
+            return Response.status(Response.Status.OK).entity(userIds).build();
         }
-        List<Integer> userIds = chatBean.getUserIdsForUser(userId);
-
-        return Response.status(Response.Status.OK).entity(userIds).build();
     }
 
     @POST
