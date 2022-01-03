@@ -3,17 +3,19 @@ package si.fri.rso.uniborrow.chat.api.v1.resources;
 import com.kumuluz.ee.discovery.annotations.DiscoverService;
 import com.kumuluz.ee.logs.cdi.Log;
 import org.eclipse.microprofile.metrics.annotation.Counted;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 import si.fri.rso.uniborrow.chat.lib.Chat;
 import si.fri.rso.uniborrow.chat.services.beans.ChatBean;
+import si.fri.rso.uniborrow.chat.services.clients.UniborrowUserApi;
+import si.fri.rso.uniborrow.chat.services.dtos.UniborrowUserRequest;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.*;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -30,10 +32,21 @@ public class ChatResource {
     @Inject
     ChatBean chatBean;
 
+    private UniborrowUserApi uniborrowUserApi;
+
     @Inject
     @DiscoverService(value = "uniborrow-users-service", version = "1.0.0", environment = "dev")
-    private Optional<WebTarget> usersService;
+    private Optional<URL> usersServiceUrl;
 
+    @PostConstruct
+    private void init() {
+        if (usersServiceUrl != null && usersServiceUrl.isPresent()) {
+            uniborrowUserApi = RestClientBuilder
+                    .newBuilder()
+                    .baseUrl(usersServiceUrl.get())
+                    .build(UniborrowUserApi.class);
+        }
+    }
 
     @GET
     @Path("/private")
@@ -68,32 +81,20 @@ public class ChatResource {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        if (usersService.isPresent()) {
-            WebTarget userFromService = usersService.get().path("/v1/users/" + chat.getUserFromId());
-            WebTarget userToService = usersService.get().path("/v1/users/" + chat.getUserToId());
+        if (uniborrowUserApi == null) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
 
-            Response responseFrom;
-            Response responseTo;
-            try {
-                responseFrom = userFromService.request().get();
-                responseTo = userToService.request().get();
-            } catch (Exception e) {
-                log.warning("Error: message " + e.getMessage() + ", usersService url: " + usersService.get().getUri().toString());
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-            }
-
-            if (responseFrom.getStatus() != Response.Status.OK.getStatusCode() ||
-                    responseTo.getStatus() != Response.Status.OK.getStatusCode()) {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
-
+        UniborrowUserRequest fromUser = uniborrowUserApi.getById(chat.getUserFromId());
+        UniborrowUserRequest toUser = uniborrowUserApi.getById(chat.getUserToId());
+        if (fromUser != null && toUser != null) {
             Chat createdChat = chatBean.createChat(chat);
             if (createdChat == null) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             }
             return Response.status(Response.Status.CREATED).entity(createdChat).build();
         } else {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
     }
 

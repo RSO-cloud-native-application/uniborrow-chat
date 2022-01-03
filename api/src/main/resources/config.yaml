@@ -38,6 +38,10 @@ kumuluzee:
       - name: chat-endpoint
         url-pattren: /v1/chat/*
         status-codes: "200, 500"
+  rest-client:
+    registrations:
+      - class: uniborrow-users-api
+        read-timeout: 5000
   logs:
     config-file: '<?xml version="1.0" encoding="UTF-8"?>
                               <Configuration name="comments">
