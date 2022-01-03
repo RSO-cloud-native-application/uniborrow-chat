@@ -13,7 +13,7 @@ spec:
         app: uniborrow-chat
     spec:
       containers:
-        - image: lh5107/uniborrow-chat:2021-12-31-03-47-02
+        - image: lh5107/uniborrow-chat:2022-01-03-22-09-17
           name: uniborrow-chat
           env:
             - name: KUMULUZEE_DATASOURCES0_CONNECTIONURL
