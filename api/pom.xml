@@ -89,6 +89,16 @@
         </dependency>
 
         <dependency>
+            <groupId>com.kumuluz.ee.openapi</groupId>
+            <artifactId>kumuluzee-openapi-mp</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.kumuluz.ee.openapi</groupId>
+            <artifactId>kumuluzee-openapi-mp-ui</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>si.fri.rso.uniborrow</groupId>
             <artifactId>chat-lib</artifactId>
         </dependency>

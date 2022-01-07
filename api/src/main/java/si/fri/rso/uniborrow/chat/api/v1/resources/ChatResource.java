@@ -3,6 +3,15 @@ package si.fri.rso.uniborrow.chat.api.v1.resources;
 import com.kumuluz.ee.discovery.annotations.DiscoverService;
 import com.kumuluz.ee.logs.cdi.Log;
 import org.eclipse.microprofile.metrics.annotation.Counted;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 import si.fri.rso.uniborrow.chat.lib.Chat;
 import si.fri.rso.uniborrow.chat.services.beans.ChatBean;
@@ -50,9 +59,29 @@ public class ChatResource {
 
     @GET
     @Path("/private")
+    @Operation(description = "Get chats between users.", summary = "Get chats between users.")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "Messages for chat between two users.",
+                    content = @Content(schema = @Schema(implementation = Chat.class, type = SchemaType.ARRAY))
+            ),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "No messages found."
+            )
+    })
     public Response getChatForUsers(
-            @QueryParam("userOne") Integer userOne,
-            @QueryParam("userTwo") Integer userTwo) {
+            @Parameter(
+                    in = ParameterIn.QUERY,
+                    description = "User ID",
+                    required = true
+            ) @QueryParam("userOne") Integer userOne,
+            @Parameter(
+                    in = ParameterIn.QUERY,
+                    description = "User ID",
+                    required = true
+            ) @QueryParam("userTwo") Integer userTwo) {
         if (userOne == null || userTwo == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
@@ -63,8 +92,24 @@ public class ChatResource {
     }
 
     @GET
+    @Operation(description = "Get all chats or user IDs associated with user.", summary = "Get chats or user IDs for user")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "All chat messages",
+                    content = @Content(schema = @Schema(implementation = Chat.class, type = SchemaType.ARRAY))
+            ),
+            @APIResponse(
+                    responseCode = "200",
+                    description = "All User IDs that chat with a specific user.",
+                    content = @Content(schema = @Schema(implementation = Integer.class, type = SchemaType.ARRAY))
+            )
+    })
     public Response getUserChats(
-            @QueryParam("userId") Integer userId) {
+            @Parameter(
+                    in = ParameterIn.QUERY,
+                    description = "User ID"
+            ) @QueryParam("userId") Integer userId) {
         if (userId == null) {
             List<Chat> chats = chatBean.getAllChats();
             return Response.status(Response.Status.OK).entity(chats).build();
@@ -76,7 +121,28 @@ public class ChatResource {
 
     @POST
     @Counted(name = "num_created_messages")
-    public Response createChat(Chat chat) {
+    @Operation(description = "Create new chat message.", summary = "Create new chat message")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "201",
+                    description = "Chat message successfully created.",
+                    content = @Content(schema = @Schema(implementation = Chat.class))
+            ),
+            @APIResponse(
+                    responseCode = "400",
+                    description = "Bad request"
+            ),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "Wrong user ID."
+            )
+    })
+    public Response createChat(
+            @RequestBody(
+                    description = "DTO for chat message.",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = Chat.class))
+            ) Chat chat) {
         if (chat.getMessage() == null || chat.getUserFromId() == null || chat.getUserToId() == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -101,7 +167,22 @@ public class ChatResource {
     @DELETE
     @Path("/{chatId}")
     @Counted(name = "num_deleted_messages")
-    public Response deleteChat(@PathParam("chatId") Integer chatId) {
+    @Operation(description = "Delete a chat message.", summary = "Delete chat message")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "204",
+                    description = "Successfully delete a chat message"
+            ),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "Chat message not found."
+            )
+    })
+    public Response deleteChat(
+            @Parameter(
+                    description = "Chat message ID.",
+                    required = true
+            ) @PathParam("chatId") Integer chatId) {
         boolean isSuccessful = chatBean.deleteChat(chatId);
         return isSuccessful
                 ? Response.status(Response.Status.NO_CONTENT).build()
