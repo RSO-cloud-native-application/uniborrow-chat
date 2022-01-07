@@ -33,6 +33,8 @@ spec:
               value: http://uniborrow-chat:8085
             - name: KUMULUZEE_DISCOVERY_CLUSTER
               value: uniborrow-cluster
+            - name: KUMULUZEE_HEALTH_CHECKS_ETCDHEALTHCHECK_CONNETCIONURL
+              value: http://etcd:2379/health
           ports:
             - containerPort: 8085
               name: server
