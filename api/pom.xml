@@ -99,6 +99,11 @@
         </dependency>
 
         <dependency>
+            <groupId>com.kumuluz.ee.fault.tolerance</groupId>
+            <artifactId>kumuluzee-fault-tolerance-smallrye</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>si.fri.rso.uniborrow</groupId>
             <artifactId>chat-lib</artifactId>
         </dependency>

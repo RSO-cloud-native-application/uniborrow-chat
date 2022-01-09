@@ -1,6 +1,9 @@
 package si.fri.rso.uniborrow.chat.services.beans;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
+import org.eclipse.microprofile.faulttolerance.Fallback;
+import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import si.fri.rso.uniborrow.chat.lib.Chat;
@@ -11,6 +14,8 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
 import java.sql.Timestamp;
 import java.util.List;
@@ -25,12 +30,20 @@ public class ChatBean {
     @Inject
     private EntityManager em;
 
+    @Timeout(value = 2, unit = ChronoUnit.SECONDS)
+    @Fallback(fallbackMethod = "getAllChatsFallback")
     public List<Chat> getAllChats() {
         TypedQuery<ChatEntity> query = em.createNamedQuery("ChatEntity.getAllChats", ChatEntity.class);
         List<ChatEntity> resultList = query.getResultList();
         return resultList.stream().map(ChatConverter::toDto).collect(Collectors.toList());
     }
 
+    public List<Chat> getAllChatsFallback() {
+        return new ArrayList<Chat>();
+    }
+
+    @Timeout(value = 2, unit = ChronoUnit.SECONDS)
+    @Fallback(fallbackMethod = "getChatsForUsersFallback")
     public List<Chat> getChatsForUsers(Integer userOne, Integer userTwo) {
         TypedQuery<ChatEntity> query = em.createNamedQuery("ChatEntity.getChatOfUsers", ChatEntity.class)
                 .setParameter("userOne", userOne)
@@ -39,6 +52,12 @@ public class ChatBean {
         return resultList.stream().map(ChatConverter::toDto).collect(Collectors.toList());
     }
 
+    public List<Chat> getChatsForUsersFallback(Integer userOne, Integer userTwo) {
+        return new ArrayList<Chat>();
+    }
+
+    @Timeout(value = 2, unit = ChronoUnit.SECONDS)
+    @Fallback(fallbackMethod = "getIdsForUserFallback")
     public List<Integer> getUserIdsForUser(Integer userId) {
         TypedQuery<Integer> queryFrom = em.createNamedQuery("ChatEntity.getUsersFromForUser", Integer.class)
                 .setParameter("userId", userId);
@@ -47,6 +66,10 @@ public class ChatBean {
                 .setParameter("userId", userId);
         users.addAll(queryTo.getResultList());
         return users.stream().distinct().collect(Collectors.toList());
+    }
+
+    public List<Integer> getIdsForUserFallback(Integer userId) {
+        return new ArrayList<Integer>();
     }
 
     public Chat createChat(Chat chat) {

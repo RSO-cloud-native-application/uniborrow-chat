@@ -2,6 +2,9 @@ package si.fri.rso.uniborrow.chat.api.v1.resources;
 
 import com.kumuluz.ee.discovery.annotations.DiscoverService;
 import com.kumuluz.ee.logs.cdi.Log;
+import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
+import org.eclipse.microprofile.faulttolerance.Fallback;
+import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
@@ -25,6 +28,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URL;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -137,18 +141,21 @@ public class ChatResource {
                     description = "Wrong user ID."
             )
     })
+    @CircuitBreaker
+    @Fallback(fallbackMethod = "createChatFallback")
+    @Timeout(value = 5, unit = ChronoUnit.SECONDS)
     public Response createChat(
             @RequestBody(
                     description = "DTO for chat message.",
                     required = true,
                     content = @Content(schema = @Schema(implementation = Chat.class))
-            ) Chat chat) {
+            ) Chat chat) throws Exception {
         if (chat.getMessage() == null || chat.getUserFromId() == null || chat.getUserToId() == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
         if (uniborrowUserApi == null) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            throw new Exception();
         }
 
         UniborrowUserRequest fromUser = uniborrowUserApi.getById(chat.getUserFromId());
@@ -156,12 +163,16 @@ public class ChatResource {
         if (fromUser != null && toUser != null) {
             Chat createdChat = chatBean.createChat(chat);
             if (createdChat == null) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+                throw new Exception();
             }
             return Response.status(Response.Status.CREATED).entity(createdChat).build();
         } else {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
+    }
+
+    public Response createChatFallback(Chat chat) {
+        return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
 
     @DELETE
